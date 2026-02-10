@@ -2,7 +2,9 @@ import { TypeOrmModuleAsyncOptions } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { join } from 'path';
 
-const entities = [];
+const entities = [
+    join(__dirname, '..', 'entities', '**', '*.entity.{ts,js}'),
+];
 
 export const typeOrmConfig: TypeOrmModuleAsyncOptions = {
   useFactory: async () => {

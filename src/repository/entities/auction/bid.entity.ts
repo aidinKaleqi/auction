@@ -14,7 +14,7 @@ import { BidStatus } from 'src/module/auction/enums/bid.enum';
 
 @Entity('bids')
 @Check(`"amount" > 0`)
-@Check(`"created_at" <= CURRENT_TIMESTAMP`)
+@Check(`"createdAt" <= CURRENT_TIMESTAMP`)
 export class Bid {
   @PrimaryGeneratedColumn('increment', { type: 'bigint' })
   id: number;
