@@ -15,7 +15,7 @@ import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity
 export class DatabaseRepository {
   constructor(
     @InjectEntityManager()
-    private readonly entityManager: EntityManager,
+    readonly entityManager: EntityManager,
   ) {}
 
   async insert<T extends ObjectLiteral>(

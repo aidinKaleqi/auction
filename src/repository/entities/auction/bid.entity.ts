@@ -8,24 +8,24 @@ import {
   UpdateDateColumn,
   Check,
 } from 'typeorm';
-import { Auction } from './auction.entity';
-import { User } from '../user/user.entity';
+import { AuctionEntity } from './auction.entity';
+import { UserEntity } from '../user/user.entity';
 import { BidStatus } from 'src/module/auction/enums/bid.enum';
 
 @Entity('bids')
 @Check(`"amount" > 0`)
 @Check(`"createdAt" <= CURRENT_TIMESTAMP`)
-export class Bid {
+export class BidEntity {
   @PrimaryGeneratedColumn('increment', { type: 'bigint' })
   id: number;
 
-  @ManyToOne(() => Auction, { nullable: false, onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'auction_id' })
-  auction: Auction;
+  @ManyToOne(() => AuctionEntity, { nullable: false, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'auction' })
+  auction: AuctionEntity;
 
-  @ManyToOne(() => User, { nullable: false, onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'bidder_id' })
-  bidder: User;
+  @ManyToOne(() => UserEntity, { nullable: false, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'bidder' })
+  bidder: UserEntity;
 
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   amount: string;

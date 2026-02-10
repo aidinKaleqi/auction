@@ -7,11 +7,11 @@ import {
   JoinColumn,
   VersionColumn,
 } from 'typeorm';
-import { User } from '../user/user.entity';
+import { UserEntity } from '../user/user.entity';
 import { AuctionStatus } from 'src/module/auction/enums/auction.enum';
 
 @Entity('auctions')
-export class Auction {
+export class AuctionEntity {
   @PrimaryGeneratedColumn('increment', { type: 'bigint' })
   id: number;
 
@@ -48,11 +48,11 @@ export class Auction {
   @Column({ type: 'timestamp', nullable: true })
   closedAt?: Date;
 
-  @ManyToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
-  @JoinColumn({ name: 'winner_id' })
-  winner?: User;
+  @ManyToOne(() => UserEntity, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'winner' })
+  winner?: UserEntity;
 
-  @ManyToOne(() => User, { nullable: false, onDelete: 'RESTRICT' })
-  @JoinColumn({ name: 'created_by_id' })
-  createdBy: User;
+  @ManyToOne(() => UserEntity, { nullable: false, onDelete: 'RESTRICT' })
+  @JoinColumn({ name: 'createdBy' })
+  createdBy: UserEntity;
 }

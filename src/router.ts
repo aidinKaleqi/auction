@@ -2,7 +2,7 @@ import { AuctionModule } from './module/auction/auction.module';
 
 export const Routes = [
   {
-    path: '/auction',
+    path: '/auctions',
     module: AuctionModule,
   },
 ];
