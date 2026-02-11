@@ -16,6 +16,6 @@ export function Logger(
     url: request.path,
     method: request.method,
   };
-  console.log(data);
+  if(process.env.SERVICE_LOG_SHOW === 'true') console.log(data);
   next();
 }

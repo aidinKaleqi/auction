@@ -9,8 +9,9 @@ import { DataSource } from 'typeorm/data-source/DataSource';
 
 @Injectable()
 export class AuctionService {
-  constructor(private readonly auctionRepository: AuctionRepository, 
-     private readonly dataSource: DataSource,
+  constructor(
+    private readonly auctionRepository: AuctionRepository,
+    private readonly dataSource: DataSource,
   ) {}
 
   async createAuction(
@@ -79,8 +80,13 @@ export class AuctionService {
     return Number(amount) > currentPrice;
   }
 
-  async placeBid(userId: number, auction: AuctionEntity, amount: string, bidReason?: string): Promise<BidEntity> {
-   const bid = await this.auctionRepository.insert(BidEntity, {
+  async placeBid(
+    userId: number,
+    auction: AuctionEntity,
+    amount: string,
+    bidReason?: string,
+  ): Promise<BidEntity> {
+    const bid = await this.auctionRepository.insert(BidEntity, {
       auction: { id: auction.id },
       bidder: { id: userId },
       amount: amount,
@@ -90,5 +96,5 @@ export class AuctionService {
     auction.currentHighestBid = amount;
     await this.auctionRepository.save(AuctionEntity, auction);
     return bid.body;
-}
+  }
 }

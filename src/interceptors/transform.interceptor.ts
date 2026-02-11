@@ -23,7 +23,7 @@ export class TransformInterceptor implements NestInterceptor {
           responseTimeMs:
             Utility.getCurrentTime() - Number(request.headers['start-time']),
         };
-        console.log(log);
+       if(process.env.SERVICE_LOG_SHOW === 'true') console.log(log);
         const result = Utility.formatResponse(
           data,
           request.headers['request-id'],

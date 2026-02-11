@@ -20,7 +20,7 @@ export class CustomEventFilter implements ExceptionFilter {
         Utility.getCurrentTime() - Number(request.headers['start-time']),
       stack: exception.stack,
     };
-    console.log(log);
+    if(process.env.SERVICE_LOG_SHOW === 'true') console.log(log);
     const result = Utility.formatResponse(
       { event: exception.message },
       request.headers['request-id'] as string,
