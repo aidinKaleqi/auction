@@ -58,6 +58,14 @@ export class AuctionService {
     return result;
   }
 
+  async getBidsForAuction(auctionId: number): Promise<BidEntity[]> {
+    const result = await this.auctionRepository.findAll(BidEntity, {
+      where: { auction: { id: auctionId } },
+      relations: ['bidder'],
+    });
+    return result.body;
+  }
+
   private async determineWinner(id: number): Promise<void> {
     const highestBid = await this.auctionRepository.getHighestBidder(id);
     if (highestBid) {

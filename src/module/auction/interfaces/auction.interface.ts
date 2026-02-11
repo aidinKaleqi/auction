@@ -1,5 +1,6 @@
 import { AuctionEntity } from 'src/repository/entities/auction/auction.entity';
 import { AuctionStatus } from '../enums/auction.enum';
+import { BidEntity } from 'src/repository/entities/auction/bid.entity';
 
 export interface CreateAuctionInterface {
   result: string;
@@ -39,4 +40,8 @@ export interface DetermineWinnerInterface {
 
 export interface PlaceBidInterface {
   result: string;
+}
+
+export interface GetBidsInterface {
+  bids: BidEntity[];
 }

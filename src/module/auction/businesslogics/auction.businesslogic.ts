@@ -4,6 +4,7 @@ import { CreateAuctionDto } from '../dtos/create-auction.dto';
 import { AuctionEntity } from 'src/repository/entities/auction/auction.entity';
 import { CustomEvent } from 'src/filter/custom.event';
 import { UserService } from 'src/module/user/services/user.service';
+import { BidEntity } from 'src/repository/entities/auction/bid.entity';
 
 @Injectable()
 export class AuctionBusinessLogic {
@@ -68,5 +69,10 @@ export class AuctionBusinessLogic {
       throw new CustomEvent('Auction Not Found', 404);
     }
     return body;
+  }
+
+  async getBidsForAuction(auctionId: number): Promise<BidEntity[]> {
+    await this.getAuctionById(auctionId);
+    return await this.auctionService.getBidsForAuction(auctionId);
   }
 }

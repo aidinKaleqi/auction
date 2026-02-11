@@ -19,6 +19,7 @@ import {
   CloseAuctionInterface,
   DetermineWinnerInterface,
   PlaceBidInterface,
+  GetBidsInterface
 } from '../interfaces/auction.interface';
 import { AuctionBusinessLogic } from '../businesslogics/auction.businesslogic';
 
@@ -69,6 +70,14 @@ export class AuctionController {
   ): Promise<PlaceBidInterface> {
     await this.auctionBusinessLogic.placeBid(1, auctionId, body.amount);
     return { result: 'success' };
+  }
+
+  @Get(':id/bids')
+  async getBids(
+    @Param('id', ParseIntPipe) id: number,
+): Promise<GetBidsInterface> {
+    const bids = await this.auctionBusinessLogic.getBidsForAuction(id);
+    return { bids };
   }
 
   @Get(':id')
