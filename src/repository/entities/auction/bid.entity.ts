@@ -7,6 +7,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   Check,
+  Index,
 } from 'typeorm';
 import { AuctionEntity } from './auction.entity';
 import { UserEntity } from '../user/user.entity';
@@ -15,6 +16,9 @@ import { BidStatus } from 'src/module/auction/enums/bid.enum';
 @Entity('bids')
 @Check(`"amount" > 0`)
 @Check(`"createdAt" <= CURRENT_TIMESTAMP`)
+@Index('idx_bids_auction_id', ['auction'])
+@Index('idx_bids_bidder_id', ['bidder'])
+@Index('idx_bids_auction_amount', ['auction', 'amount'])
 export class BidEntity {
   @PrimaryGeneratedColumn('increment', { type: 'bigint' })
   id: number;

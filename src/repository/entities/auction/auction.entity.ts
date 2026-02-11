@@ -6,11 +6,14 @@ import {
   ManyToOne,
   JoinColumn,
   VersionColumn,
+  Index,
 } from 'typeorm';
 import { UserEntity } from '../user/user.entity';
 import { AuctionStatus } from 'src/module/auction/enums/auction.enum';
 
 @Entity('auctions')
+@Index("idx_auctions_status_ends_at", ["status", "endsAt"])
+@Index("idx_auctions_winner_id", ["winner"])
 export class AuctionEntity {
   @PrimaryGeneratedColumn('increment', { type: 'bigint' })
   id: number;
