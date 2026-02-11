@@ -6,18 +6,58 @@ import { AuctionStatus } from '../enums/auction.enum';
 import { BidEntity } from 'src/repository/entities/auction/bid.entity';
 import { BidStatus } from '../enums/bid.enum';
 import { DataSource } from 'typeorm/data-source/DataSource';
+import { Queue } from 'bull';
+import { InjectQueue } from '@nestjs/bull/dist/decorators/inject-queue.decorator';
+import { title } from 'process';
 
 @Injectable()
 export class AuctionService {
   constructor(
     private readonly auctionRepository: AuctionRepository,
     private readonly dataSource: DataSource,
+    @InjectQueue('auction-lifecycle')
+    private readonly auctionQueue: Queue,
   ) {}
 
   async createAuction(
     createAuctionDto: CreateAuctionDto,
   ): Promise<AuctionEntity> {
-    return this.auctionRepository.createAuction(createAuctionDto, 1);
+    const startsAtTs = Date.parse(createAuctionDto.startsAt); // میلی‌ثانیه UTC
+    const endsAtTs =
+      startsAtTs + Number(process.env.AUCTION_DURATION_MINUTES) * 60 * 1000;
+    const startsAtDate = new Date(startsAtTs);
+    const endsAtDate = new Date(endsAtTs);
+    const data: Partial<AuctionEntity> = {
+      title: createAuctionDto.title,
+      description: createAuctionDto.description,
+      startingPrice: createAuctionDto.startingPrice,
+      startsAt: startsAtDate,
+      endsAt: endsAtDate,
+    };
+    const auction = await this.auctionRepository.createAuction(data, 1);
+    await this.scheduleAuctionJobs(auction.id, startsAtTs, endsAtTs);
+    return auction;
+  }
+  async scheduleAuctionJobs(id: number, startsAt: number, endsAt: number) {
+    const now = Date.now();
+    const startDelay = startsAt - now;
+    const closeDelay = endsAt - now;
+
+    if (startDelay > 0) {
+      await this.auctionQueue.add(
+        'start-auction',
+        { auctionId: id },
+        { delay: startDelay },
+      );
+    }
+
+    if (closeDelay > 0) {
+      await this.auctionQueue.add(
+        'close-auction',
+        { auctionId: id },
+        { delay: closeDelay },
+      );
+    }
   }
 
   async getAuctionById(
@@ -46,6 +86,14 @@ export class AuctionService {
 
   async closeAuction(id: number): Promise<void> {
     await this.determineWinner(id);
+  }
+
+  async startAuction(id: number): Promise<void> {
+    await this.auctionRepository.update(
+      AuctionEntity,
+      { id },
+      { status: AuctionStatus.ACTIVE },
+    );
   }
 
   async getAuctionWinner(

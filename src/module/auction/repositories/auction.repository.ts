@@ -14,8 +14,8 @@ export class AuctionRepository extends DatabaseRepository {
     super(entityManager);
   }
   async createAuction(
-    createAuctionDto: CreateAuctionDto,
-    userId: number,
+    createAuctionDto: Partial<AuctionEntity>,
+    userId: number
   ): Promise<AuctionEntity> {
     try {
       const auction = this.entityManager.create(AuctionEntity, {

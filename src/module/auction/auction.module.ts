@@ -8,8 +8,16 @@ import { CustomErrorFilter } from 'src/filter/customError.filter';
 import { CustomEventFilter } from 'src/filter/customEvent.filter';
 import { UserModule } from '../user/user.module';
 import { AuctionBusinessLogic } from './businesslogics/auction.businesslogic';
+import { BullModule } from '@nestjs/bull';
+
 @Module({
-  imports: [RepositoryModule, UserModule],
+  imports: [
+    RepositoryModule,
+    UserModule,
+    BullModule.registerQueue({
+      name: 'auction-lifecycle',
+    }),
+  ],
   controllers: [AuctionController],
   providers: [
     AuctionService,

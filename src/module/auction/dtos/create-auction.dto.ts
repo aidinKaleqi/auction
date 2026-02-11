@@ -22,8 +22,4 @@ export class CreateAuctionDto {
   @IsISO8601()
   @IsNotEmpty()
   startsAt: string;
-
-  @IsISO8601()
-  @IsNotEmpty()
-  endsAt: string;
 }
