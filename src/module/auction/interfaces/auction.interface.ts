@@ -26,9 +26,17 @@ export interface GetAuctionInterface {
 }
 
 export interface GetActiveAuctionsInterface {
-    auctions: AuctionEntity[];
+  auctions: AuctionEntity[];
 }
 
 export interface CloseAuctionInterface {
-    result: string;
+  result: string;
+}
+
+export interface DetermineWinnerInterface {
+  winner: AuctionEntity['winner'];
+}
+
+export interface PlaceBidInterface {
+  result: string;
 }

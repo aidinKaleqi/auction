@@ -5,6 +5,8 @@ import { AuctionEntity } from 'src/repository/entities/auction/auction.entity';
 import { EntityManager } from 'typeorm';
 import { AuctionStatus } from '../enums/auction.enum';
 import { CustomError } from 'src/filter/custom.error';
+import { BidEntity } from 'src/repository/entities/auction/bid.entity';
+import { CreateAuctionDto } from '../dtos/create-auction.dto';
 
 @Injectable()
 export class AuctionRepository extends DatabaseRepository {
@@ -12,7 +14,7 @@ export class AuctionRepository extends DatabaseRepository {
     super(entityManager);
   }
   async createAuction(
-    createAuctionDto: any,
+    createAuctionDto: CreateAuctionDto,
     userId: number,
   ): Promise<AuctionEntity> {
     try {
@@ -26,5 +28,18 @@ export class AuctionRepository extends DatabaseRepository {
     } catch (error) {
       throw new CustomError('databaseError', 500, error);
     }
+  }
+
+  async getHighestBidder(auctionId: number) {
+    const highestBid = await this.entityManager
+      .getRepository(BidEntity)
+      .createQueryBuilder('bid')
+      .leftJoinAndSelect('bid.bidder', 'user')
+      .where('bid.auction = :auctionId', { auctionId })
+      .andWhere('bid.status = :status', { status: 'accepted' })
+      .orderBy('bid.amount', 'DESC')
+      .addOrderBy('bid.createdAt', 'ASC')
+      .getOne();
+    return highestBid;
   }
 }

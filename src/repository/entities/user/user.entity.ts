@@ -23,6 +23,14 @@ export class UserEntity {
     default: 0,
   })
   balance: string;
+  
+  @Column({
+    type: 'decimal',
+    precision: 12,
+    scale: 2,
+    default: 0,
+  })
+  reservedBalance: string;
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

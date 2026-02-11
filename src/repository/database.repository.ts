@@ -106,4 +106,12 @@ export class DatabaseRepository {
       throw new CustomError('databaseError', 500, error);
     }
   }
+
+  async save<T extends ObjectLiteral>(entityObject: EntityTarget<T>, data: T): Promise<T> { 
+    try {
+      return await this.entityManager.save(entityObject, data);
+    } catch (error) {
+      throw new CustomError('databaseError', 500, error);
+    }
+  }
 }
