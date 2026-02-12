@@ -17,10 +17,8 @@ export class AuctionService {
     @InjectQueue('auction-lifecycle')
     private readonly auctionQueue: Queue,
   ) {}
-
-  async createAuction(
-    data: Partial<AuctionEntity>,
-  ): Promise<AuctionEntity> {
+  
+  async createAuction(data: Partial<AuctionEntity>): Promise<AuctionEntity> {
     const auction = await this.auctionRepository.createAuction(data, 1);
     return auction;
   }

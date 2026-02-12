@@ -3,14 +3,14 @@ import { AuctionService } from '../services/auction.service';
 import { CreateAuctionDto } from '../dtos/create-auction.dto';
 import { AuctionEntity } from 'src/repository/entities/auction/auction.entity';
 import { CustomEvent } from 'src/filter/custom.event';
-import { UserService } from 'src/module/user/services/user.service';
 import { BidEntity } from 'src/repository/entities/auction/bid.entity';
+import { UserBusinessLogic } from 'src/module/user/businesslogics/user.businesslogic';
 
 @Injectable()
 export class AuctionBusinessLogic {
   constructor(
     private readonly auctionService: AuctionService,
-    private readonly userService: UserService,
+    private readonly userBusinessLogic: UserBusinessLogic,
   ) {}
 
   async createAuction(createAuction: CreateAuctionDto): Promise<void> {
@@ -44,7 +44,7 @@ export class AuctionBusinessLogic {
   async closeAuction(id: number): Promise<void> {
     await this.getAuctionById(id);
     const highestBid = await this.auctionService.closeAuction(id);
-    await this.userService.deductBalance(
+    await this.userBusinessLogic.deductBalance(
       highestBid.bidder.id,
       Number(highestBid.amount),
     );
@@ -77,7 +77,7 @@ export class AuctionBusinessLogic {
       throw new CustomEvent('Bid must be higher than current highest bid', 400);
     }
     const hasSufficientBalance =
-      await this.userService.ensureUserHasSufficientBalance(Number(amount));
+      await this.userBusinessLogic.ensureUserHasSufficientBalance(Number(amount));
     if (!hasSufficientBalance) {
       throw new CustomEvent('Insufficient balance', 400);
     }

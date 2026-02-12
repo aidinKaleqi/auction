@@ -107,9 +107,24 @@ export class DatabaseRepository {
     }
   }
 
-  async save<T extends ObjectLiteral>(entityObject: EntityTarget<T>, data: T): Promise<T> { 
+  async save<T extends ObjectLiteral>(
+    entityObject: EntityTarget<T>,
+    data: T,
+  ): Promise<T> {
     try {
       return await this.entityManager.save(entityObject, data);
+    } catch (error) {
+      throw new CustomError('databaseError', 500, error);
+    }
+  }
+
+  async exists<T extends ObjectLiteral>(
+    entityObject: EntityTarget<T>,
+    options: FindManyOptions,
+  ): Promise<boolean> {
+    try {
+      const result = await this.entityManager.exists(entityObject, options);
+      return !!result;
     } catch (error) {
       throw new CustomError('databaseError', 500, error);
     }
