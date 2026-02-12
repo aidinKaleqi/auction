@@ -9,6 +9,7 @@ import { CustomEventFilter } from 'src/filter/customEvent.filter';
 import { UserModule } from '../user/user.module';
 import { AuctionBusinessLogic } from './businesslogics/auction.businesslogic';
 import { BullModule } from '@nestjs/bull';
+import { AuctionProcessor } from './processes/auction.process';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { BullModule } from '@nestjs/bull';
       provide: APP_FILTER,
       useClass: CustomEventFilter,
     },
+    AuctionProcessor
   ],
   exports: [AuctionService],
 })
