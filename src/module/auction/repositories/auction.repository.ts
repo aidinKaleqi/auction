@@ -30,7 +30,7 @@ export class AuctionRepository extends DatabaseRepository {
     }
   }
 
-  async getHighestBidder(auctionId: number) {
+  async getHighestBidder(auctionId: number) : Promise<BidEntity> {
     const highestBid = await this.entityManager
       .getRepository(BidEntity)
       .createQueryBuilder('bid')

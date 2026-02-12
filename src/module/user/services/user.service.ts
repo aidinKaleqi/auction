@@ -23,4 +23,15 @@ export class UserService {
       return true;
     });
   }
+
+  async deductBalance(userId: number, amount: number): Promise<void> {
+    await this.dataSource.transaction(async (manager) => {
+      const user = await this.userRepository.findUserAndLock(userId, manager);
+      user.balance = String(Number(user.balance) - amount);
+      user.reservedBalance = String(
+        Number(user.reservedBalance || 0) - amount,
+      );
+      await this.userRepository.saveUser(user, manager);
+    });
+  }
 }

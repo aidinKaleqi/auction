@@ -34,6 +34,6 @@ import { AuctionProcessor } from './processes/auction.process';
     },
     AuctionProcessor
   ],
-  exports: [AuctionService],
+  exports: [AuctionBusinessLogic],
 })
 export class AuctionModule {}

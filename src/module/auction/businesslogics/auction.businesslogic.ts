@@ -14,7 +14,24 @@ export class AuctionBusinessLogic {
   ) {}
 
   async createAuction(createAuction: CreateAuctionDto): Promise<void> {
-    await this.auctionService.createAuction(createAuction);
+    const startsAtTs = Date.parse(createAuction.startsAt);
+    const endsAtTs =
+      startsAtTs + Number(process.env.AUCTION_DURATION_MINUTES) * 60 * 1000;
+    const startsAtDate = new Date(startsAtTs);
+    const endsAtDate = new Date(endsAtTs);
+    const auction: Partial<AuctionEntity> = {
+      title: createAuction.title,
+      description: createAuction.description,
+      startingPrice: createAuction.startingPrice,
+      startsAt: startsAtDate,
+      endsAt: endsAtDate,
+    };
+    const auctionCreated = await this.auctionService.createAuction(auction);
+    await this.auctionService.scheduleAuctionJobs(
+      auctionCreated.id,
+      startsAtTs,
+      endsAtTs,
+    );
   }
 
   async getActiveAuctions(
@@ -26,7 +43,11 @@ export class AuctionBusinessLogic {
 
   async closeAuction(id: number): Promise<void> {
     await this.getAuctionById(id);
-    await this.auctionService.closeAuction(id);
+    const highestBid = await this.auctionService.closeAuction(id);
+    await this.userService.deductBalance(
+      highestBid.bidder.id,
+      Number(highestBid.amount),
+    );
   }
 
   async getAuctionWinner(id: number): Promise<AuctionEntity['winner']> {
@@ -74,5 +95,9 @@ export class AuctionBusinessLogic {
   async getBidsForAuction(auctionId: number): Promise<BidEntity[]> {
     await this.getAuctionById(auctionId);
     return await this.auctionService.getBidsForAuction(auctionId);
+  }
+
+  async startAuction(id: number): Promise<void> {
+    await this.auctionService.startAuction(id);
   }
 }

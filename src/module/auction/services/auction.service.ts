@@ -8,7 +8,6 @@ import { BidStatus } from '../enums/bid.enum';
 import { DataSource } from 'typeorm/data-source/DataSource';
 import { Queue } from 'bull';
 import { InjectQueue } from '@nestjs/bull/dist/decorators/inject-queue.decorator';
-import { title } from 'process';
 
 @Injectable()
 export class AuctionService {
@@ -20,22 +19,9 @@ export class AuctionService {
   ) {}
 
   async createAuction(
-    createAuctionDto: CreateAuctionDto,
+    data: Partial<AuctionEntity>,
   ): Promise<AuctionEntity> {
-    const startsAtTs = Date.parse(createAuctionDto.startsAt); // میلی‌ثانیه UTC
-    const endsAtTs =
-      startsAtTs + Number(process.env.AUCTION_DURATION_MINUTES) * 60 * 1000;
-    const startsAtDate = new Date(startsAtTs);
-    const endsAtDate = new Date(endsAtTs);
-    const data: Partial<AuctionEntity> = {
-      title: createAuctionDto.title,
-      description: createAuctionDto.description,
-      startingPrice: createAuctionDto.startingPrice,
-      startsAt: startsAtDate,
-      endsAt: endsAtDate,
-    };
     const auction = await this.auctionRepository.createAuction(data, 1);
-    await this.scheduleAuctionJobs(auction.id, startsAtTs, endsAtTs);
     return auction;
   }
   async scheduleAuctionJobs(id: number, startsAt: number, endsAt: number) {
@@ -84,8 +70,9 @@ export class AuctionService {
     return body;
   }
 
-  async closeAuction(id: number): Promise<void> {
-    await this.determineWinner(id);
+  async closeAuction(id: number): Promise<BidEntity> {
+    const highestBid = await this.determineWinner(id);
+    return highestBid;
   }
 
   async startAuction(id: number): Promise<void> {
@@ -114,7 +101,7 @@ export class AuctionService {
     return result.body;
   }
 
-  private async determineWinner(id: number): Promise<void> {
+  private async determineWinner(id: number): Promise<BidEntity> {
     const highestBid = await this.auctionRepository.getHighestBidder(id);
     if (highestBid) {
       await this.auctionRepository.update(
@@ -127,6 +114,7 @@ export class AuctionService {
         },
       );
     }
+    return highestBid;
   }
 
   validateBidAmount(auction: AuctionEntity, amount: string): boolean {
