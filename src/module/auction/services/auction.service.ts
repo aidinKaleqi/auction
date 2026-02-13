@@ -8,16 +8,18 @@ import { BidStatus } from '../enums/bid.enum';
 import { DataSource } from 'typeorm/data-source/DataSource';
 import { Queue } from 'bull';
 import { InjectQueue } from '@nestjs/bull/dist/decorators/inject-queue.decorator';
+import { CacheRepository } from 'src/repository/cache.repository';
 
 @Injectable()
 export class AuctionService {
+  private auctionCacheKey: string = 'auctionKey_';
   constructor(
     private readonly auctionRepository: AuctionRepository,
-    private readonly dataSource: DataSource,
+    private readonly cacheRepository: CacheRepository,
     @InjectQueue('auction-lifecycle')
     private readonly auctionQueue: Queue,
   ) {}
-  
+
   async createAuction(data: Partial<AuctionEntity>): Promise<AuctionEntity> {
     const auction = await this.auctionRepository.createAuction(data, 1);
     return auction;
@@ -47,6 +49,13 @@ export class AuctionService {
   async getAuctionById(
     id: number,
   ): Promise<{ body: AuctionEntity; exists: boolean }> {
+    const auction = await this.getAuctionFromCache(id);
+    if (auction) {
+      return {
+        exists: true,
+        body: auction,
+      };
+    }
     const result = await this.auctionRepository.findOne(AuctionEntity, {
       where: { id },
     });
@@ -84,11 +93,38 @@ export class AuctionService {
   async getAuctionWinner(
     id: number,
   ): Promise<{ body: AuctionEntity; exists: boolean }> {
+    const auction = await this.getAuctionFromCache(id);
+    if (auction) {
+      return {
+        exists: true,
+        body: auction,
+      };
+    }
     const result = await this.auctionRepository.findOne(AuctionEntity, {
       where: { id },
       relations: ['winner'],
     });
+    if (result.body.status == AuctionStatus.CLOSED) {
+      await this.setAuctionInCache(id, result.body);
+    }
     return result;
+  }
+
+  async getAuctionFromCache(id: number): Promise<AuctionEntity | null> {
+    const auction = await this.cacheRepository.get(
+      `${this.auctionCacheKey}${id}`,
+    );
+    return auction ? JSON.parse(auction) : null;
+  }
+
+  async setAuctionInCache(
+    id: number,
+    data: AuctionEntity,
+  ): Promise<void> {
+    await this.cacheRepository.set(
+      `${this.auctionCacheKey}${id}`,
+      JSON.stringify(data),
+    );
   }
 
   async getBidsForAuction(auctionId: number): Promise<BidEntity[]> {
